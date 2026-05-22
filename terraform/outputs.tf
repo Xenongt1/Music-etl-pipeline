@@ -18,6 +18,21 @@ output "dynamodb_table_top_genres_per_day" {
   value       = aws_dynamodb_table.top_genres_per_day.name
 }
 
+output "glue_job_validate" {
+  description = "Name of the validate_streams Glue job"
+  value       = aws_glue_job.validate_streams.name
+}
+
+output "glue_job_transform" {
+  description = "Name of the transform_kpis Glue job"
+  value       = aws_glue_job.transform_kpis.name
+}
+
+output "glue_job_load" {
+  description = "Name of the load_dynamodb Glue job"
+  value       = aws_glue_job.load_dynamodb.name
+}
+
 output "glue_role_arn" {
   description = "IAM role ARN assumed by all three Glue jobs"
   value       = aws_iam_role.glue.arn
