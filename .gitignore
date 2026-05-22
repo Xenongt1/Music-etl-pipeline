@@ -6,7 +6,7 @@
 *.tfvars.json
 crash.log
 crash.*.log
-.terraform.lock.hcl
+# Note: .terraform.lock.hcl is intentionally NOT ignored — commit it to pin provider versions
 
 # Python
 __pycache__/
@@ -41,3 +41,7 @@ Thumbs.db
 
 # Logs
 *.log
+
+# Internal session files — useful locally, not for the public repo
+CLAUDE.md
+docs/decisions.md
