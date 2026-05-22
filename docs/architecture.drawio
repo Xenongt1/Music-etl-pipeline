@@ -5,135 +5,132 @@
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
 
-        <!-- ── OUTER BORDER ───────────────────────────────────────────────── -->
-        <mxCell id="border" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8f9fa;strokeColor=#444444;strokeWidth=2;" vertex="1" parent="1">
-          <mxGeometry x="20" y="20" width="1430" height="460" as="geometry" />
+        <!-- ── SWIMLANE BACKGROUND BANDS ──────────────────────────────────── -->
+        <mxCell id="band_ingestion" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eaf4ea;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="180" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="band_trigger" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fce8f3;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="200" y="20" width="180" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="band_orchestration" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fce8f3;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="380" y="20" width="180" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="band_processing" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f3eeff;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="560" y="20" width="500" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="band_storage" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e8f0fb;strokeColor=none;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="20" width="390" height="500" as="geometry" />
         </mxCell>
 
-        <!-- ── SECTION HEADER BANDS ───────────────────────────────────────── -->
-        <mxCell id="band1" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#eaf4ea;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="20" y="20" width="180" height="460" as="geometry" />
-        </mxCell>
-        <mxCell id="band2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fce8f3;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="200" y="20" width="180" height="460" as="geometry" />
-        </mxCell>
-        <mxCell id="band3" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fce8f3;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="380" y="20" width="180" height="460" as="geometry" />
-        </mxCell>
-        <mxCell id="band4" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f0eaff;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="560" y="20" width="500" height="460" as="geometry" />
-        </mxCell>
-        <mxCell id="band5" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#e8f0fb;strokeColor=none;" vertex="1" parent="1">
-          <mxGeometry x="1060" y="20" width="390" height="460" as="geometry" />
-        </mxCell>
-
-        <!-- Redraw border on top of bands so it is visible -->
-        <mxCell id="border2" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#444444;strokeWidth=2;" vertex="1" parent="1">
-          <mxGeometry x="20" y="20" width="1430" height="460" as="geometry" />
+        <!-- ── OUTER BORDER (drawn last so it sits on top of bands) ─────── -->
+        <mxCell id="border" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=none;strokeColor=#444444;strokeWidth=2;" vertex="1" parent="1">
+          <mxGeometry x="20" y="20" width="1430" height="500" as="geometry" />
         </mxCell>
 
         <!-- ── SECTION DIVIDERS ───────────────────────────────────────────── -->
-        <mxCell id="div1" value="" style="endArrow=none;html=1;dashed=1;dashPattern=6 6;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+        <mxCell id="div1" value="" style="endArrow=none;html=1;dashed=1;dashPattern=6 6;strokeColor=#aaaaaa;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="200" y="20" as="sourcePoint"/>
-            <mxPoint x="200" y="480" as="targetPoint"/>
+            <mxPoint x="200" y="520" as="targetPoint"/>
           </mxGeometry>
         </mxCell>
-        <mxCell id="div2" value="" style="endArrow=none;html=1;dashed=1;dashPattern=6 6;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+        <mxCell id="div2" value="" style="endArrow=none;html=1;dashed=1;dashPattern=6 6;strokeColor=#aaaaaa;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="380" y="20" as="sourcePoint"/>
-            <mxPoint x="380" y="480" as="targetPoint"/>
+            <mxPoint x="380" y="520" as="targetPoint"/>
           </mxGeometry>
         </mxCell>
-        <mxCell id="div3" value="" style="endArrow=none;html=1;dashed=1;dashPattern=6 6;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+        <mxCell id="div3" value="" style="endArrow=none;html=1;dashed=1;dashPattern=6 6;strokeColor=#aaaaaa;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="560" y="20" as="sourcePoint"/>
-            <mxPoint x="560" y="480" as="targetPoint"/>
+            <mxPoint x="560" y="520" as="targetPoint"/>
           </mxGeometry>
         </mxCell>
-        <mxCell id="div4" value="" style="endArrow=none;html=1;dashed=1;dashPattern=6 6;strokeColor=#aaaaaa;strokeWidth=1;" edge="1" parent="1">
+        <mxCell id="div4" value="" style="endArrow=none;html=1;dashed=1;dashPattern=6 6;strokeColor=#aaaaaa;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1060" y="20" as="sourcePoint"/>
-            <mxPoint x="1060" y="480" as="targetPoint"/>
+            <mxPoint x="1060" y="520" as="targetPoint"/>
           </mxGeometry>
         </mxCell>
 
         <!-- ── SECTION LABELS ─────────────────────────────────────────────── -->
-        <mxCell id="lbl1" value="Ingestion" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#2d6a2d;" vertex="1" parent="1">
-          <mxGeometry x="20" y="22" width="180" height="26" as="geometry" />
+        <mxCell id="lbl_ingestion" value="Ingestion" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#2d6a2d;" vertex="1" parent="1">
+          <mxGeometry x="20" y="24" width="180" height="24" as="geometry" />
         </mxCell>
-        <mxCell id="lbl2" value="Trigger" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#9c1060;" vertex="1" parent="1">
-          <mxGeometry x="200" y="22" width="180" height="26" as="geometry" />
+        <mxCell id="lbl_trigger" value="Trigger" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#9c1060;" vertex="1" parent="1">
+          <mxGeometry x="200" y="24" width="180" height="24" as="geometry" />
         </mxCell>
-        <mxCell id="lbl3" value="Orchestration" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#9c1060;" vertex="1" parent="1">
-          <mxGeometry x="380" y="22" width="180" height="26" as="geometry" />
+        <mxCell id="lbl_orchestration" value="Orchestration" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#9c1060;" vertex="1" parent="1">
+          <mxGeometry x="380" y="24" width="180" height="24" as="geometry" />
         </mxCell>
-        <mxCell id="lbl4" value="Processing  ·  AWS Glue" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#4a1e8c;" vertex="1" parent="1">
-          <mxGeometry x="560" y="22" width="500" height="26" as="geometry" />
+        <mxCell id="lbl_processing" value="Processing  ·  AWS Glue" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#4a1e8c;" vertex="1" parent="1">
+          <mxGeometry x="560" y="24" width="500" height="24" as="geometry" />
         </mxCell>
-        <mxCell id="lbl5" value="Storage  ·  DynamoDB" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#155296;" vertex="1" parent="1">
-          <mxGeometry x="1060" y="22" width="390" height="26" as="geometry" />
+        <mxCell id="lbl_storage" value="Storage  ·  DynamoDB" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;fontStyle=1;fontSize=11;fontColor=#155296;" vertex="1" parent="1">
+          <mxGeometry x="1060" y="24" width="390" height="24" as="geometry" />
         </mxCell>
 
         <!-- ── S3 RAW ──────────────────────────────────────────────────────── -->
-        <mxCell id="s3_raw" value="&lt;b&gt;Amazon S3&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;raw/streams/&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5a7c0a;strokeColor=#3d5507;fontColor=#ffffff;fontSize=12;arcSize=12;" vertex="1" parent="1">
-          <mxGeometry x="40" y="175" width="140" height="65" as="geometry" />
+        <!-- html=1 + verticalLabelPosition=bottom ensures the label renders    -->
+        <!-- as HTML below the icon, not as raw tags floating on top of it      -->
+        <mxCell id="s3_raw" value="Amazon S3&lt;br&gt;raw/streams/" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;html=1;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;labelPosition=center;sketch=0;fillColor=#7AA116;strokeColor=none;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="75" y="155" width="70" height="70" as="geometry" />
         </mxCell>
 
         <!-- ── EVENTBRIDGE ─────────────────────────────────────────────────── -->
-        <mxCell id="eventbridge" value="&lt;b&gt;EventBridge&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;ObjectCreated rule&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C7006B;strokeColor=#96004f;fontColor=#ffffff;fontSize=12;arcSize=12;" vertex="1" parent="1">
-          <mxGeometry x="220" y="175" width="140" height="65" as="geometry" />
+        <mxCell id="eventbridge" value="EventBridge&lt;br&gt;ObjectCreated rule" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.eventbridge;html=1;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;labelPosition=center;sketch=0;fillColor=#E7157B;strokeColor=none;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="255" y="155" width="70" height="70" as="geometry" />
         </mxCell>
 
         <!-- ── STEP FUNCTIONS ──────────────────────────────────────────────── -->
-        <mxCell id="sfn" value="&lt;b&gt;Step Functions&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;State Machine&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#C7006B;strokeColor=#96004f;fontColor=#ffffff;fontSize=12;arcSize=12;" vertex="1" parent="1">
-          <mxGeometry x="400" y="175" width="140" height="65" as="geometry" />
+        <mxCell id="sfn" value="Step Functions&lt;br&gt;State Machine" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.step_functions;html=1;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;labelPosition=center;sketch=0;fillColor=#E7157B;strokeColor=none;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="435" y="155" width="70" height="70" as="geometry" />
         </mxCell>
 
-        <!-- ── GLUE: VALIDATE ──────────────────────────────────────────────── -->
-        <mxCell id="validate" value="&lt;b&gt;validate_streams&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Python Shell&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;schema · nulls · timestamps&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5C0099;strokeColor=#400070;fontColor=#ffffff;fontSize=11;arcSize=10;" vertex="1" parent="1">
-          <mxGeometry x="585" y="168" width="155" height="80" as="geometry" />
+        <!-- ── GLUE: VALIDATE ─────────────────────────────────────────────── -->
+        <mxCell id="validate" value="validate_streams&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Python Shell&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;schema · nulls · timestamps&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5C0099;strokeColor=#400070;fontColor=#ffffff;fontStyle=1;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="578" y="150" width="148" height="80" as="geometry" />
         </mxCell>
 
-        <!-- ── GLUE: TRANSFORM ─────────────────────────────────────────────── -->
-        <mxCell id="transform" value="&lt;b&gt;transform_kpis&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;PySpark&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;joins · aggregations · rankings&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5C0099;strokeColor=#400070;fontColor=#ffffff;fontSize=11;arcSize=10;" vertex="1" parent="1">
-          <mxGeometry x="775" y="168" width="155" height="80" as="geometry" />
+        <!-- ── GLUE: TRANSFORM ────────────────────────────────────────────── -->
+        <mxCell id="transform" value="transform_kpis&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;PySpark&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;joins · aggregations · rankings&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5C0099;strokeColor=#400070;fontColor=#ffffff;fontStyle=1;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="745" y="150" width="148" height="80" as="geometry" />
         </mxCell>
 
-        <!-- ── GLUE: LOAD ───────────────────────────────────────────────────── -->
-        <mxCell id="load" value="&lt;b&gt;load_dynamodb&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Python Shell&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;boto3 batch_writer&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5C0099;strokeColor=#400070;fontColor=#ffffff;fontSize=11;arcSize=10;" vertex="1" parent="1">
-          <mxGeometry x="965" y="168" width="155" height="80" as="geometry" />
+        <!-- ── GLUE: LOAD ──────────────────────────────────────────────────── -->
+        <mxCell id="load" value="load_dynamodb&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;Python Shell&lt;/font&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;boto3 batch_writer&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#5C0099;strokeColor=#400070;fontColor=#ffffff;fontStyle=1;fontSize=11;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="912" y="150" width="148" height="80" as="geometry" />
         </mxCell>
 
         <!-- ── DYNAMODB: daily_genre_kpis ─────────────────────────────────── -->
-        <mxCell id="ddb1" value="&lt;b&gt;daily_genre_kpis&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;PK: genre  ·  SK: date&lt;/font&gt;" style="shape=cylinder3;size=10;whiteSpace=wrap;html=1;fillColor=#1558A8;strokeColor=#0e3d7a;fontColor=#ffffff;fontSize=10;boundedLbl=1;backgroundOutline=1;" vertex="1" parent="1">
-          <mxGeometry x="1095" y="105" width="165" height="75" as="geometry" />
+        <mxCell id="ddb1" value="daily_genre_kpis&lt;br&gt;PK: genre  ·  SK: date" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;html=1;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;labelPosition=center;sketch=0;fillColor=#1F70C1;strokeColor=none;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="105" width="70" height="70" as="geometry" />
         </mxCell>
 
         <!-- ── DYNAMODB: top_songs_per_genre ──────────────────────────────── -->
-        <mxCell id="ddb2" value="&lt;b&gt;top_songs_per_genre&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;PK: genre_date  ·  SK: rank&lt;/font&gt;" style="shape=cylinder3;size=10;whiteSpace=wrap;html=1;fillColor=#1558A8;strokeColor=#0e3d7a;fontColor=#ffffff;fontSize=10;boundedLbl=1;backgroundOutline=1;" vertex="1" parent="1">
-          <mxGeometry x="1095" y="210" width="165" height="75" as="geometry" />
+        <mxCell id="ddb2" value="top_songs_per_genre&lt;br&gt;PK: genre_date  ·  SK: rank" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;html=1;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;labelPosition=center;sketch=0;fillColor=#1F70C1;strokeColor=none;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="225" width="70" height="70" as="geometry" />
         </mxCell>
 
         <!-- ── DYNAMODB: top_genres_per_day ───────────────────────────────── -->
-        <mxCell id="ddb3" value="&lt;b&gt;top_genres_per_day&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:9px;&quot;&gt;PK: date  ·  SK: rank&lt;/font&gt;" style="shape=cylinder3;size=10;whiteSpace=wrap;html=1;fillColor=#1558A8;strokeColor=#0e3d7a;fontColor=#ffffff;fontSize=10;boundedLbl=1;backgroundOutline=1;" vertex="1" parent="1">
-          <mxGeometry x="1095" y="315" width="165" height="75" as="geometry" />
+        <mxCell id="ddb3" value="top_genres_per_day&lt;br&gt;PK: date  ·  SK: rank" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.dynamodb;html=1;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;labelPosition=center;sketch=0;fillColor=#1F70C1;strokeColor=none;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="1220" y="345" width="70" height="70" as="geometry" />
         </mxCell>
 
         <!-- ── S3 QUARANTINE ───────────────────────────────────────────────── -->
-        <mxCell id="quarantine" value="&lt;b&gt;S3 Quarantine&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;quarantine/streams/&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#AE1316;strokeColor=#7a0d0f;fontColor=#ffffff;fontSize=11;arcSize=12;" vertex="1" parent="1">
-          <mxGeometry x="585" y="360" width="155" height="65" as="geometry" />
+        <mxCell id="quarantine" value="S3 Quarantine&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;quarantine/streams/&lt;/font&gt;" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;html=1;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;labelPosition=center;sketch=0;fillColor=#AE1316;strokeColor=none;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="617" y="350" width="70" height="70" as="geometry" />
         </mxCell>
 
         <!-- ── S3 ARCHIVE ──────────────────────────────────────────────────── -->
-        <mxCell id="archive" value="&lt;b&gt;S3 Archive&lt;/b&gt;&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;processed/streams/&lt;/font&gt;" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#3a5c08;strokeColor=#263f05;fontColor=#ffffff;fontSize=11;arcSize=12;" vertex="1" parent="1">
-          <mxGeometry x="775" y="360" width="155" height="65" as="geometry" />
+        <mxCell id="archive" value="S3 Archive&lt;br&gt;&lt;font style=&quot;font-size:10px;&quot;&gt;processed/streams/&lt;/font&gt;" style="shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;html=1;whiteSpace=wrap;verticalLabelPosition=bottom;verticalAlign=top;labelPosition=center;sketch=0;fillColor=#3a5c08;strokeColor=none;fontColor=#333333;fontSize=10;" vertex="1" parent="1">
+          <mxGeometry x="784" y="350" width="70" height="70" as="geometry" />
         </mxCell>
 
         <!-- ── EDGES ───────────────────────────────────────────────────────── -->
 
         <!-- S3 raw → EventBridge -->
-        <mxCell id="e1" value="ObjectCreated" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=9;fontColor=#444444;labelBackgroundColor=#f8f9fa;" edge="1" source="s3_raw" target="eventbridge" parent="1">
+        <mxCell id="e1" value="ObjectCreated" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontSize=9;fontColor=#444444;labelBackgroundColor=#eaf4ea;" edge="1" source="s3_raw" target="eventbridge" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
@@ -148,12 +145,12 @@
         </mxCell>
 
         <!-- Validate → Transform (PASSED) -->
-        <mxCell id="e4" value="PASSED" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontColor=#2E7D32;fontStyle=1;fontSize=10;labelBackgroundColor=#f8f9fa;" edge="1" source="validate" target="transform" parent="1">
+        <mxCell id="e4" value="PASSED" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;fontColor=#2E7D32;fontStyle=1;fontSize=10;labelBackgroundColor=#f3eeff;" edge="1" source="validate" target="transform" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
         <!-- Validate → Quarantine (FAILED) -->
-        <mxCell id="e5" value="FAILED" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontColor=#AE1316;fontStyle=1;fontSize=10;labelBackgroundColor=#f8f9fa;" edge="1" source="validate" target="quarantine" parent="1">
+        <mxCell id="e5" value="FAILED" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontColor=#AE1316;fontStyle=1;fontSize=10;labelBackgroundColor=#f3eeff;" edge="1" source="validate" target="quarantine" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
@@ -163,7 +160,7 @@
         </mxCell>
 
         <!-- Transform → Archive -->
-        <mxCell id="e7" value="archive" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=9;fontColor=#444444;labelBackgroundColor=#f8f9fa;" edge="1" source="transform" target="archive" parent="1">
+        <mxCell id="e7" value="archive" style="edgeStyle=orthogonalEdgeStyle;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.5;entryY=0;entryDx=0;entryDy=0;fontSize=9;fontColor=#444444;labelBackgroundColor=#f3eeff;" edge="1" source="transform" target="archive" parent="1">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
 
