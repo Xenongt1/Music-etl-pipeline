@@ -9,45 +9,9 @@ triggered by S3 PutObject events via EventBridge.
 
 ## Architecture
 
-```mermaid
-flowchart LR
-    subgraph Ingestion
-        S3_RAW["S3\nraw/streams/"]
-        EB["EventBridge\nS3 ObjectCreated rule"]
-    end
+![Architecture](docs/architecture.png)
 
-    subgraph Orchestration
-        SFN["Step Functions\nState Machine"]
-    end
-
-    subgraph Processing
-        VALIDATE["Glue — validate_streams\nPython Shell\nschema · nulls · timestamps"]
-        TRANSFORM["Glue — transform_kpis\nPySpark\njoins · aggregations · rankings"]
-        LOAD["Glue — load_dynamodb\nPython Shell\nboto3 batch_writer"]
-    end
-
-    subgraph Storage
-        DDB1[("DynamoDB\ndaily_genre_kpis")]
-        DDB2[("DynamoDB\ntop_songs_per_genre")]
-        DDB3[("DynamoDB\ntop_genres_per_day")]
-    end
-
-    subgraph Outcomes
-        ARCHIVE["S3\nprocessed/streams/"]
-        QUARANTINE["S3\nquarantine/streams/"]
-    end
-
-    S3_RAW -->|"ObjectCreated"| EB
-    EB --> SFN
-    SFN --> VALIDATE
-    VALIDATE -->|"PASSED"| TRANSFORM
-    VALIDATE -->|"FAILED"| QUARANTINE
-    TRANSFORM --> LOAD
-    TRANSFORM --> ARCHIVE
-    LOAD --> DDB1
-    LOAD --> DDB2
-    LOAD --> DDB3
-```
+> Source: [`docs/architecture.drawio`](docs/architecture.drawio) — open in [draw.io](https://app.diagrams.net) to edit.
 
 ---
 
