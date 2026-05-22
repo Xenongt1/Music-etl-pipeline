@@ -5,61 +5,113 @@ validates and transforms them with AWS Glue, computes daily KPIs per genre,
 and loads results into DynamoDB. Orchestrated by AWS Step Functions and
 triggered by S3 PutObject events via EventBridge.
 
-> See [`CLAUDE.md`](./CLAUDE.md) for full project context, decisions, and the
-> in-progress build plan.
+---
 
-## Architecture (high level)
+## Architecture
 
+```mermaid
+flowchart LR
+    subgraph Ingestion
+        S3_RAW["S3\nraw/streams/"]
+        EB["EventBridge\nS3 ObjectCreated rule"]
+    end
+
+    subgraph Orchestration
+        SFN["Step Functions\nState Machine"]
+    end
+
+    subgraph Processing
+        VALIDATE["Glue — validate_streams\nPython Shell\nschema · nulls · timestamps"]
+        TRANSFORM["Glue — transform_kpis\nPySpark\njoins · aggregations · rankings"]
+        LOAD["Glue — load_dynamodb\nPython Shell\nboto3 batch_writer"]
+    end
+
+    subgraph Storage
+        DDB1[("DynamoDB\ndaily_genre_kpis")]
+        DDB2[("DynamoDB\ntop_songs_per_genre")]
+        DDB3[("DynamoDB\ntop_genres_per_day")]
+    end
+
+    subgraph Outcomes
+        ARCHIVE["S3\nprocessed/streams/"]
+        QUARANTINE["S3\nquarantine/streams/"]
+    end
+
+    S3_RAW -->|"ObjectCreated"| EB
+    EB --> SFN
+    SFN --> VALIDATE
+    VALIDATE -->|"PASSED"| TRANSFORM
+    VALIDATE -->|"FAILED"| QUARANTINE
+    TRANSFORM --> LOAD
+    TRANSFORM --> ARCHIVE
+    LOAD --> DDB1
+    LOAD --> DDB2
+    LOAD --> DDB3
 ```
-  CSV lands in           EventBridge          Step Functions state machine
-  s3://.../raw/streams/  ───────────────▶     ┌──────────────────────────┐
-                                              │  validate (Python Shell) │
-                                              │       │                  │
-                                              │       ▼                  │
-                                              │  transform (PySpark)     │
-                                              │       │                  │
-                                              │       ▼                  │
-                                              │  load_dynamodb           │
-                                              │       │                  │
-                                              │       ▼                  │
-                                              │  archive (S3 copy+del)   │
-                                              └──────────────────────────┘
-                                                        │
-                                                        ▼
-                                              DynamoDB KPI tables
-```
+
+---
+
+## KPIs computed (daily, per genre)
+
+| KPI | Table |
+|---|---|
+| Listen count | `daily_genre_kpis` |
+| Unique listeners | `daily_genre_kpis` |
+| Total listening time | `daily_genre_kpis` |
+| Avg listening time per user | `daily_genre_kpis` |
+| Top 3 songs per genre | `top_songs_per_genre` |
+| Top 5 genres by listen count | `top_genres_per_day` |
+
+---
 
 ## Folder layout
 
 | Path | Purpose |
 |---|---|
 | `terraform/` | All AWS resources (S3, DynamoDB, IAM, Glue, Step Functions, EventBridge) |
-| `glue_jobs/` | Python source for Glue jobs (uploaded to S3 by `deploy.sh`) |
+| `glue_jobs/` | Python source for the three Glue jobs — uploaded to S3 by `deploy.sh` |
 | `step_functions/` | State machine definition (ASL JSON) |
-| `scripts/` | Local helper scripts: deploy, upload sample data, local PySpark sanity check |
-| `docs/` | Architecture diagram, DynamoDB schema rationale, sample query patterns |
+| `scripts/` | Helper scripts: deploy, upload sample data, local PySpark sanity check |
+| `docs/` | Architecture diagram (draw.io), DynamoDB schema, sample queries |
 
-## Quick start (once code is written)
+---
+
+## Quick start
 
 ```bash
-# 1. configure AWS
-aws configure
+# 1. Set your AWS profile
+export AWS_PROFILE=mubarak-admin
 
-# 2. provision infrastructure
+# 2. Provision infrastructure
 cd terraform
 terraform init
+terraform plan
 terraform apply
 
-# 3. upload Glue scripts + sample data
+# 3. Upload Glue scripts and sample data
 cd ..
 ./scripts/deploy.sh
 ./scripts/upload_sample_data.sh
 
-# 4. watch the Step Function execution in the AWS console,
-#    or query DynamoDB after it finishes
+# 4. Drop a streams file into S3 to trigger the pipeline
+aws s3 cp ../data/streams/streams1.csv s3://<bucket>/raw/streams/streams1.csv
+
+# 5. Monitor execution in the Step Functions console,
+#    then query DynamoDB once the run completes
 ```
 
-## Status
+---
 
-In active build — see the 9-step plan in `CLAUDE.md`. Currently between
-Step 1 (scaffold ✅) and Step 2 (DynamoDB schema design).
+## Build status
+
+| Step | Status |
+|---|---|
+| 1. Scaffold project structure | ✅ |
+| 2. DynamoDB schema design | ✅ |
+| 3. Terraform — S3, DynamoDB, IAM | ✅ |
+| 4. Glue validation job | ✅ |
+| 5. Glue transform job (PySpark) | ✅ |
+| 6. Glue DynamoDB load job | 🔄 |
+| 7. Step Functions + EventBridge | ⬜ |
+| 8. Deploy scripts + docs | ⬜ |
+| 9. Local PySpark verification | ⬜ |
