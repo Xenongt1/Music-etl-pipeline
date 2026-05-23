@@ -56,6 +56,8 @@ songs = (
     spark.read
     .option("header", "true")
     .option("inferSchema", "true")
+    .option("quote", '"')
+    .option("escape", '"')
     .csv(s3(SONGS_KEY))
     # Keep only the columns the transform actually needs
     .select("track_id", "track_genre", "duration_ms", "track_name", "artists")
@@ -76,10 +78,11 @@ enriched = (
     )
     .withColumn(
         "duration_ms",
-        F.col("duration_ms").cast("long")
+        F.expr("try_cast(duration_ms as bigint)")  # null on bad values instead of error
     )
     .filter(F.col("date").isNotNull())           # drop rows with unparseable timestamps
     .filter(F.col("track_genre").isNotNull())    # drop rows with no genre
+    .filter(F.col("duration_ms").isNotNull())    # drop rows where duration couldn't be parsed
 )
 
 

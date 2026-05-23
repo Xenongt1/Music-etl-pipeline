@@ -40,8 +40,15 @@ spark.sparkContext.setLogLevel("WARN")
 
 # ── Load ──────────────────────────────────────────────────────────────────────
 streams = spark.read.option("header", "true").option("inferSchema", "true").csv(STREAMS_CSV)
-songs   = spark.read.option("header", "true").option("inferSchema", "true").csv(SONGS_CSV) \
-               .select("track_id", "track_genre", "duration_ms", "track_name", "artists")
+songs   = (
+    spark.read
+    .option("header", "true")
+    .option("inferSchema", "true")
+    .option("quote", '"')
+    .option("escape", '"')
+    .csv(SONGS_CSV)
+    .select("track_id", "track_genre", "duration_ms", "track_name", "artists")
+)
 
 print(f"\nStreams rows : {streams.count()}")
 print(f"Songs rows  : {songs.count()}")
@@ -50,7 +57,8 @@ print(f"Songs rows  : {songs.count()}")
 enriched = (
     streams.join(songs, on="track_id", how="inner")
     .withColumn("date", F.to_date(F.col("listen_time")))
-    .withColumn("duration_ms", F.col("duration_ms").cast("long"))
+    .withColumn("duration_ms", F.expr("try_cast(duration_ms as bigint)"))
+    .filter(F.col("duration_ms").isNotNull())
     .filter(F.col("date").isNotNull())
     .filter(F.col("track_genre").isNotNull())
 )
