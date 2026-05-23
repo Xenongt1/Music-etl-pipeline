@@ -47,3 +47,13 @@ output "eventbridge_role_arn" {
   description = "IAM role ARN assumed by the EventBridge rule"
   value       = aws_iam_role.eventbridge.arn
 }
+
+output "state_machine_arn" {
+  description = "ARN of the Step Functions state machine"
+  value       = aws_sfn_state_machine.pipeline.arn
+}
+
+output "eventbridge_rule_name" {
+  description = "Name of the EventBridge rule watching raw/streams/"
+  value       = aws_cloudwatch_event_rule.s3_put.name
+}
