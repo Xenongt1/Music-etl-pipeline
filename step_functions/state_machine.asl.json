@@ -1,0 +1,172 @@
+{
+  "Comment": "Music ETL pipeline — validate → transform → load, with quarantine on failure",
+  "StartAt": "ValidateStreams",
+
+  "States": {
+
+    "ValidateStreams": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync:2",
+      "Parameters": {
+        "JobName": "${glue_validate_job}",
+        "Arguments": {
+          "--bucket.$":      "$.bucket",
+          "--source_key.$":  "$.source_key",
+          "--result_key.$":  "$.result_key"
+        }
+      },
+      "ResultPath": "$.validate_result",
+      "Next": "ReadValidationResult",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "MoveToQuarantine"
+        }
+      ]
+    },
+
+    "ReadValidationResult": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+      "Parameters": {
+        "Bucket.$": "$.bucket",
+        "Key.$":    "$.result_key"
+      },
+      "ResultSelector": {
+        "body.$": "States.StringToJson($.Body)"
+      },
+      "ResultPath": "$.validation",
+      "Next": "CheckValidationStatus"
+    },
+
+    "CheckValidationStatus": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.validation.body.status",
+          "StringEquals": "PASSED",
+          "Next": "TransformKpis"
+        }
+      ],
+      "Default": "MoveToQuarantine"
+    },
+
+    "TransformKpis": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync:2",
+      "Parameters": {
+        "JobName": "${glue_transform_job}",
+        "Arguments": {
+          "--bucket.$":        "$.bucket",
+          "--source_key.$":    "$.source_key",
+          "--songs_key.$":     "$.songs_key",
+          "--output_prefix.$": "$.output_prefix"
+        }
+      },
+      "ResultPath": "$.transform_result",
+      "Next": "LoadDynamoDB",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "TransformFailed"
+        }
+      ]
+    },
+
+    "LoadDynamoDB": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::glue:startJobRun.sync:2",
+      "Parameters": {
+        "JobName": "${glue_load_job}",
+        "Arguments": {
+          "--bucket.$":        "$.bucket",
+          "--input_prefix.$":  "$.output_prefix",
+          "--table_kpis":      "${table_kpis}",
+          "--table_songs":     "${table_songs}",
+          "--table_genres":    "${table_genres}"
+        }
+      },
+      "ResultPath": "$.load_result",
+      "Next": "ArchiveFile",
+      "Catch": [
+        {
+          "ErrorEquals": ["States.ALL"],
+          "ResultPath": "$.error",
+          "Next": "LoadFailed"
+        }
+      ]
+    },
+
+    "ArchiveFile": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
+      "Parameters": {
+        "Bucket.$":            "$.bucket",
+        "CopySource.$":        "States.Format('{}/{}', $.bucket, $.source_key)",
+        "Key.$":               "States.JsonMerge(States.StringToJson(States.Format('{{\"k\":\"{}\"}}', States.ArrayGetItem(States.StringSplit($.source_key, '/'), 2))), States.StringToJson('{\"prefix\":\"processed/streams/\"}'), false).prefix"
+      },
+      "ResultPath": null,
+      "Next": "DeleteRawFile",
+      "Comment": "Copy the raw file to processed/ before deleting the original"
+    },
+
+    "DeleteRawFile": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:deleteObject",
+      "Parameters": {
+        "Bucket.$": "$.bucket",
+        "Key.$":    "$.source_key"
+      },
+      "ResultPath": null,
+      "Next": "PipelineSucceeded"
+    },
+
+    "PipelineSucceeded": {
+      "Type": "Succeed"
+    },
+
+    "MoveToQuarantine": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
+      "Parameters": {
+        "Bucket.$":       "$.bucket",
+        "CopySource.$":   "States.Format('{}/{}', $.bucket, $.source_key)",
+        "Key.$":          "States.Format('quarantine/streams/{}', States.ArrayGetItem(States.StringSplit($.source_key, '/'), 2))"
+      },
+      "ResultPath": null,
+      "Next": "DeleteRawFileAfterQuarantine"
+    },
+
+    "DeleteRawFileAfterQuarantine": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:deleteObject",
+      "Parameters": {
+        "Bucket.$": "$.bucket",
+        "Key.$":    "$.source_key"
+      },
+      "ResultPath": null,
+      "Next": "PipelineFailed"
+    },
+
+    "TransformFailed": {
+      "Type": "Fail",
+      "Error": "TransformError",
+      "Cause": "transform_kpis Glue job failed — check Glue job logs"
+    },
+
+    "LoadFailed": {
+      "Type": "Fail",
+      "Error": "LoadError",
+      "Cause": "load_dynamodb Glue job failed — check Glue job logs"
+    },
+
+    "PipelineFailed": {
+      "Type": "Fail",
+      "Error": "ValidationFailed",
+      "Cause": "Incoming file failed validation and was moved to quarantine"
+    }
+
+  }
+}
