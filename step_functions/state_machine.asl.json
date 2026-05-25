@@ -1,22 +1,23 @@
 {
-  "Comment": "Music ETL pipeline — validate → transform → load, with quarantine on failure",
-  "StartAt": "ValidateStreams",
+  "Comment": "Music ETL pipeline — validate → transform → load, with quarantine on failure. Uses SDK polling (startJobRun + getJobRun) instead of .sync:2 for broad regional compatibility.",
+  "StartAt": "StartValidate",
 
   "States": {
 
-    "ValidateStreams": {
+    "StartValidate": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::glue:startJobRun.sync:2",
+      "Resource": "arn:aws:states:::aws-sdk:glue:startJobRun",
       "Parameters": {
         "JobName": "${glue_validate_job}",
         "Arguments": {
-          "--bucket.$":      "$.bucket",
-          "--source_key.$":  "$.source_key",
-          "--result_key.$":  "$.result_key"
+          "--bucket.$":     "$.bucket",
+          "--source_key.$": "$.source_key",
+          "--result_key.$": "$.result_key"
         }
       },
-      "ResultPath": "$.validate_result",
-      "Next": "ReadValidationResult",
+      "ResultSelector": { "JobRunId.$": "$.JobRunId" },
+      "ResultPath": "$.validate_job",
+      "Next": "WaitForValidate",
       "Catch": [
         {
           "ErrorEquals": ["States.ALL"],
@@ -26,35 +27,59 @@
       ]
     },
 
-    "ReadValidationResult": {
-      "Type": "Task",
-      "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
-      "Parameters": {
-        "Bucket.$": "$.bucket",
-        "Key.$":    "$.result_key"
-      },
-      "ResultSelector": {
-        "body.$": "States.StringToJson($.Body)"
-      },
-      "ResultPath": "$.validation",
-      "Next": "CheckValidationStatus"
+    "WaitForValidate": {
+      "Type": "Wait",
+      "Seconds": 20,
+      "Next": "CheckValidateStatus"
     },
 
-    "CheckValidationStatus": {
+    "CheckValidateStatus": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:glue:getJobRun",
+      "Parameters": {
+        "JobName": "${glue_validate_job}",
+        "RunId.$": "$.validate_job.JobRunId"
+      },
+      "ResultSelector": { "State.$": "$.JobRun.JobRunState" },
+      "ResultPath": "$.validate_status",
+      "Next": "ValidateChoice"
+    },
+
+    "ValidateChoice": {
       "Type": "Choice",
       "Choices": [
         {
-          "Variable": "$.validation.body.status",
-          "StringEquals": "PASSED",
-          "Next": "TransformKpis"
+          "Variable": "$.validate_status.State",
+          "StringEquals": "SUCCEEDED",
+          "Next": "StartTransform"
+        },
+        {
+          "Variable": "$.validate_status.State",
+          "StringEquals": "FAILED",
+          "Next": "MoveToQuarantine"
+        },
+        {
+          "Variable": "$.validate_status.State",
+          "StringEquals": "ERROR",
+          "Next": "MoveToQuarantine"
+        },
+        {
+          "Variable": "$.validate_status.State",
+          "StringEquals": "TIMEOUT",
+          "Next": "MoveToQuarantine"
+        },
+        {
+          "Variable": "$.validate_status.State",
+          "StringEquals": "STOPPED",
+          "Next": "MoveToQuarantine"
         }
       ],
-      "Default": "MoveToQuarantine"
+      "Default": "WaitForValidate"
     },
 
-    "TransformKpis": {
+    "StartTransform": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::glue:startJobRun.sync:2",
+      "Resource": "arn:aws:states:::aws-sdk:glue:startJobRun",
       "Parameters": {
         "JobName": "${glue_transform_job}",
         "Arguments": {
@@ -64,8 +89,9 @@
           "--output_prefix.$": "$.output_prefix"
         }
       },
-      "ResultPath": "$.transform_result",
-      "Next": "LoadDynamoDB",
+      "ResultSelector": { "JobRunId.$": "$.JobRunId" },
+      "ResultPath": "$.transform_job",
+      "Next": "WaitForTransform",
       "Catch": [
         {
           "ErrorEquals": ["States.ALL"],
@@ -75,21 +101,72 @@
       ]
     },
 
-    "LoadDynamoDB": {
+    "WaitForTransform": {
+      "Type": "Wait",
+      "Seconds": 60,
+      "Next": "CheckTransformStatus"
+    },
+
+    "CheckTransformStatus": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::glue:startJobRun.sync:2",
+      "Resource": "arn:aws:states:::aws-sdk:glue:getJobRun",
+      "Parameters": {
+        "JobName": "${glue_transform_job}",
+        "RunId.$": "$.transform_job.JobRunId"
+      },
+      "ResultSelector": { "State.$": "$.JobRun.JobRunState" },
+      "ResultPath": "$.transform_status",
+      "Next": "TransformChoice"
+    },
+
+    "TransformChoice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.transform_status.State",
+          "StringEquals": "SUCCEEDED",
+          "Next": "StartLoad"
+        },
+        {
+          "Variable": "$.transform_status.State",
+          "StringEquals": "FAILED",
+          "Next": "TransformFailed"
+        },
+        {
+          "Variable": "$.transform_status.State",
+          "StringEquals": "ERROR",
+          "Next": "TransformFailed"
+        },
+        {
+          "Variable": "$.transform_status.State",
+          "StringEquals": "TIMEOUT",
+          "Next": "TransformFailed"
+        },
+        {
+          "Variable": "$.transform_status.State",
+          "StringEquals": "STOPPED",
+          "Next": "TransformFailed"
+        }
+      ],
+      "Default": "WaitForTransform"
+    },
+
+    "StartLoad": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:glue:startJobRun",
       "Parameters": {
         "JobName": "${glue_load_job}",
         "Arguments": {
-          "--bucket.$":        "$.bucket",
-          "--input_prefix.$":  "$.output_prefix",
-          "--table_kpis":      "${table_kpis}",
-          "--table_songs":     "${table_songs}",
-          "--table_genres":    "${table_genres}"
+          "--bucket.$":       "$.bucket",
+          "--input_prefix.$": "$.output_prefix",
+          "--table_kpis":     "${table_kpis}",
+          "--table_songs":    "${table_songs}",
+          "--table_genres":   "${table_genres}"
         }
       },
-      "ResultPath": "$.load_result",
-      "Next": "ArchiveFile",
+      "ResultSelector": { "JobRunId.$": "$.JobRunId" },
+      "ResultPath": "$.load_job",
+      "Next": "WaitForLoad",
       "Catch": [
         {
           "ErrorEquals": ["States.ALL"],
@@ -99,17 +176,66 @@
       ]
     },
 
+    "WaitForLoad": {
+      "Type": "Wait",
+      "Seconds": 30,
+      "Next": "CheckLoadStatus"
+    },
+
+    "CheckLoadStatus": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:glue:getJobRun",
+      "Parameters": {
+        "JobName": "${glue_load_job}",
+        "RunId.$": "$.load_job.JobRunId"
+      },
+      "ResultSelector": { "State.$": "$.JobRun.JobRunState" },
+      "ResultPath": "$.load_status",
+      "Next": "LoadChoice"
+    },
+
+    "LoadChoice": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.load_status.State",
+          "StringEquals": "SUCCEEDED",
+          "Next": "ArchiveFile"
+        },
+        {
+          "Variable": "$.load_status.State",
+          "StringEquals": "FAILED",
+          "Next": "LoadFailed"
+        },
+        {
+          "Variable": "$.load_status.State",
+          "StringEquals": "ERROR",
+          "Next": "LoadFailed"
+        },
+        {
+          "Variable": "$.load_status.State",
+          "StringEquals": "TIMEOUT",
+          "Next": "LoadFailed"
+        },
+        {
+          "Variable": "$.load_status.State",
+          "StringEquals": "STOPPED",
+          "Next": "LoadFailed"
+        }
+      ],
+      "Default": "WaitForLoad"
+    },
+
     "ArchiveFile": {
       "Type": "Task",
       "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
       "Parameters": {
-        "Bucket.$":            "$.bucket",
-        "CopySource.$":        "States.Format('{}/{}', $.bucket, $.source_key)",
-        "Key.$":               "States.JsonMerge(States.StringToJson(States.Format('{{\"k\":\"{}\"}}', States.ArrayGetItem(States.StringSplit($.source_key, '/'), 2))), States.StringToJson('{\"prefix\":\"processed/streams/\"}'), false).prefix"
+        "Bucket.$":      "$.bucket",
+        "CopySource.$":  "States.Format('{}/{}', $.bucket, $.source_key)",
+        "Key.$":         "States.Format('processed/streams/{}', States.ArrayGetItem(States.StringSplit($.source_key, '/'), 2))"
       },
       "ResultPath": null,
-      "Next": "DeleteRawFile",
-      "Comment": "Copy the raw file to processed/ before deleting the original"
+      "Next": "DeleteRawFile"
     },
 
     "DeleteRawFile": {
@@ -123,23 +249,19 @@
       "Next": "PipelineSucceeded"
     },
 
-    "PipelineSucceeded": {
-      "Type": "Succeed"
-    },
-
     "MoveToQuarantine": {
       "Type": "Task",
       "Resource": "arn:aws:states:::aws-sdk:s3:copyObject",
       "Parameters": {
-        "Bucket.$":       "$.bucket",
-        "CopySource.$":   "States.Format('{}/{}', $.bucket, $.source_key)",
-        "Key.$":          "States.Format('quarantine/streams/{}', States.ArrayGetItem(States.StringSplit($.source_key, '/'), 2))"
+        "Bucket.$":     "$.bucket",
+        "CopySource.$": "States.Format('{}/{}', $.bucket, $.source_key)",
+        "Key.$":        "States.Format('quarantine/streams/{}', States.ArrayGetItem(States.StringSplit($.source_key, '/'), 2))"
       },
       "ResultPath": null,
-      "Next": "DeleteRawFileAfterQuarantine"
+      "Next": "DeleteRawAfterQuarantine"
     },
 
-    "DeleteRawFileAfterQuarantine": {
+    "DeleteRawAfterQuarantine": {
       "Type": "Task",
       "Resource": "arn:aws:states:::aws-sdk:s3:deleteObject",
       "Parameters": {
@@ -148,6 +270,10 @@
       },
       "ResultPath": null,
       "Next": "PipelineFailed"
+    },
+
+    "PipelineSucceeded": {
+      "Type": "Succeed"
     },
 
     "TransformFailed": {
@@ -165,7 +291,7 @@
     "PipelineFailed": {
       "Type": "Fail",
       "Error": "ValidationFailed",
-      "Cause": "Incoming file failed validation and was moved to quarantine"
+      "Cause": "File failed validation and was moved to quarantine"
     }
 
   }
