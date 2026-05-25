@@ -12,7 +12,7 @@ resource "aws_glue_job" "validate_streams" {
 
   command {
     name            = "pythonshell"
-    python_version  = "3"
+    python_version  = "3.9"
     script_location = "s3://${aws_s3_bucket.pipeline.bucket}/${local.scripts_prefix}/validate_streams.py"
   }
 
@@ -84,7 +84,7 @@ resource "aws_glue_job" "load_dynamodb" {
 
   command {
     name            = "pythonshell"
-    python_version  = "3"
+    python_version  = "3.9"
     script_location = "s3://${aws_s3_bucket.pipeline.bucket}/${local.scripts_prefix}/load_dynamodb.py"
   }
 

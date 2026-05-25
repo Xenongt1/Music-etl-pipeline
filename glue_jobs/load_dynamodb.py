@@ -12,13 +12,18 @@ Expected Glue job parameters:
   --table_kpis     : DynamoDB table name for daily_genre_kpis
   --table_songs    : DynamoDB table name for top_songs_per_genre
   --table_genres   : DynamoDB table name for top_genres_per_day
+
+Requires: pyarrow (passed via --additional-python-modules at job start)
 """
 
 import sys
+import math
 import logging
-import boto3
-import pandas as pd
+from decimal import Decimal
 from io import BytesIO
+
+import boto3
+import pyarrow.parquet as pq
 from awsglue.utils import getResolvedOptions
 
 # ── Logging ───────────────────────────────────────────────────────────────────
@@ -43,13 +48,14 @@ dynamodb = boto3.resource("dynamodb")
 
 # ── Helpers ───────────────────────────────────────────────────────────────────
 
-def read_parquet_from_s3(prefix: str) -> pd.DataFrame:
+def read_parquet_from_s3(prefix):
     """
-    Read all parquet part-files under a given S3 prefix into one DataFrame.
-    Glue PySpark writes one or more part files per output folder.
+    Read all parquet part-files under a given S3 prefix.
+    Returns a list of plain Python dicts (pyarrow.Table.to_pylist()).
+    No pandas involved — avoids the engine-discovery problem.
     """
     paginator = s3.get_paginator("list_objects_v2")
-    frames = []
+    rows = []
 
     for page in paginator.paginate(Bucket=BUCKET, Prefix=prefix + "/"):
         for obj in page.get("Contents", []):
@@ -57,31 +63,26 @@ def read_parquet_from_s3(prefix: str) -> pd.DataFrame:
             if not key.endswith(".parquet"):
                 continue
             body = s3.get_object(Bucket=BUCKET, Key=key)["Body"].read()
-            frames.append(pd.read_parquet(BytesIO(body)))
+            table = pq.read_table(BytesIO(body))
+            rows.extend(table.to_pylist())
 
-    if not frames:
+    if not rows:
         raise RuntimeError(f"No parquet files found at s3://{BUCKET}/{prefix}/")
 
-    return pd.concat(frames, ignore_index=True)
+    return rows
 
 
-def to_dynamodb_item(row: dict) -> dict:
+def to_dynamodb_item(row):
     """
-    Convert a pandas row dict to a DynamoDB-safe item.
-    - Cast numpy int64 / float64 to Python native types (DynamoDB rejects numpy types)
-    - Convert date objects to ISO strings
-    - Drop NaN values (DynamoDB does not accept None/null attribute values)
+    Convert a plain-Python dict (from pyarrow.to_pylist) to a DynamoDB-safe item.
+    - float → Decimal (DynamoDB rejects Python floats)
+    - date / datetime → ISO string
+    - None → omit (DynamoDB rejects null attribute values)
     """
-    import math
-    from decimal import Decimal
-
     item = {}
     for k, v in row.items():
         if v is None:
             continue
-        # numpy / pandas numeric types → Python int or Decimal
-        if hasattr(v, "item"):          # numpy scalar
-            v = v.item()
         if isinstance(v, float):
             if math.isnan(v):
                 continue
@@ -92,9 +93,9 @@ def to_dynamodb_item(row: dict) -> dict:
     return item
 
 
-def batch_write(table_name: str, df: pd.DataFrame):
+def batch_write(table_name, rows):
     """
-    Write all rows in df to a DynamoDB table using batch_writer.
+    Write all rows to a DynamoDB table using batch_writer.
     batch_writer handles 25-item batching and automatic retries on
     UnprocessedItems — no manual chunking needed.
     """
@@ -102,7 +103,7 @@ def batch_write(table_name: str, df: pd.DataFrame):
     count = 0
 
     with table.batch_writer() as batch:
-        for row in df.to_dict(orient="records"):
+        for row in rows:
             item = to_dynamodb_item(row)
             batch.put_item(Item=item)
             count += 1
@@ -115,23 +116,20 @@ def batch_write(table_name: str, df: pd.DataFrame):
 def main():
     log.info("Loading KPIs from s3://%s/%s", BUCKET, INPUT_PREFIX)
 
-    # 1. daily_genre_kpis
     log.info("Reading daily_genre_kpis parquet...")
-    df_kpis = read_parquet_from_s3(f"{INPUT_PREFIX}/daily_genre_kpis")
-    log.info("  %d rows", len(df_kpis))
-    batch_write(TABLE_KPIS, df_kpis)
+    rows_kpis = read_parquet_from_s3(f"{INPUT_PREFIX}/daily_genre_kpis")
+    log.info("  %d rows", len(rows_kpis))
+    batch_write(TABLE_KPIS, rows_kpis)
 
-    # 2. top_songs_per_genre
     log.info("Reading top_songs_per_genre parquet...")
-    df_songs = read_parquet_from_s3(f"{INPUT_PREFIX}/top_songs_per_genre")
-    log.info("  %d rows", len(df_songs))
-    batch_write(TABLE_SONGS, df_songs)
+    rows_songs = read_parquet_from_s3(f"{INPUT_PREFIX}/top_songs_per_genre")
+    log.info("  %d rows", len(rows_songs))
+    batch_write(TABLE_SONGS, rows_songs)
 
-    # 3. top_genres_per_day
     log.info("Reading top_genres_per_day parquet...")
-    df_genres = read_parquet_from_s3(f"{INPUT_PREFIX}/top_genres_per_day")
-    log.info("  %d rows", len(df_genres))
-    batch_write(TABLE_GENRES, df_genres)
+    rows_genres = read_parquet_from_s3(f"{INPUT_PREFIX}/top_genres_per_day")
+    log.info("  %d rows", len(rows_genres))
+    batch_write(TABLE_GENRES, rows_genres)
 
     log.info("Load complete.")
 
