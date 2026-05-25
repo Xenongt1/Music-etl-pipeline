@@ -89,9 +89,10 @@ resource "aws_glue_job" "load_dynamodb" {
   }
 
   default_arguments = {
-    "--job-language"        = "python"
-    "--enable-job-insights" = "true"
-    "--TempDir"             = "s3://${aws_s3_bucket.pipeline.bucket}/tmp/"
+    "--job-language"              = "python"
+    "--enable-job-insights"       = "true"
+    "--TempDir"                   = "s3://${aws_s3_bucket.pipeline.bucket}/tmp/"
+    "--additional-python-modules" = "pyarrow"
   }
 
   max_capacity = 0.0625
