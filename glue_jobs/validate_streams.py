@@ -14,6 +14,7 @@ Expected Glue job parameters:
 import sys
 import json
 import logging
+from typing import Tuple
 import boto3
 import pandas as pd
 from io import StringIO
@@ -50,7 +51,7 @@ def write_result(s3_client, bucket: str, key: str, status: str, reason: str = ""
     )
 
 
-def validate(df: pd.DataFrame) -> tuple[bool, str]:
+def validate(df: pd.DataFrame) -> Tuple[bool, str]:
     """
     Run all checks against the dataframe.
     Returns (passed: bool, reason: str).
